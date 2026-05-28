@@ -308,7 +308,7 @@ class HuggingfaceSubject(ArtificialSubject):
     def output_to_representations(self, layer_representations: Dict[Tuple[str, str, str], np.ndarray], stimuli_coords):
         representation_values = np.concatenate([
             # Choose to use last token (-1) of values[batch, token, unit] to represent passage.
-            values[:, -1:, :].squeeze(0).cpu() for values in layer_representations.values()],
+            self._tensor_to_numpy(values[:, -1:, :].squeeze(0)) for values in layer_representations.values()],
             axis=-1)  # concatenate along neuron axis
         neuroid_coords = {
             'layer': ('neuroid', np.concatenate([[layer] * values.shape[-1]
@@ -404,4 +404,4 @@ class HuggingfaceSubject(ArtificialSubject):
         return hook
 
     def _tensor_to_numpy(self, tensor: torch.Tensor) -> np.ndarray:
-        return tensor.cpu().data.numpy()
+        return tensor.float().cpu().data.numpy()
