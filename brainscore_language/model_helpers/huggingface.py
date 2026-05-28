@@ -17,7 +17,7 @@ from brainscore_core.supported_data_standards.brainio.assemblies import DataAsse
 from brainscore_language.artificial_subject import ArtificialSubject
 from brainscore_language.model_helpers.preprocessing import prepare_context
 from brainscore_language.utils import fullname
-from brainscore_language.model_helpers.localize import localize_fed10
+from brainscore_language.model_helpers.localize import localize_fedorenko2010
 
 
 class HuggingfaceSubject(ArtificialSubject):
@@ -92,7 +92,7 @@ class HuggingfaceSubject(ArtificialSubject):
 
         if self.use_localizer:
             layer_names = region_layer_mapping["language_system"]
-            self.language_mask = localize_fed10(model_id=self.model_id, 
+            self.language_mask = localize_fedorenko2010(model_id=self.model_id, 
                 model=self.basemodel, 
                 tokenizer=self.tokenizer, 
                 layer_names=layer_names,

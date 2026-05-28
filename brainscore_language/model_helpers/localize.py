@@ -129,7 +129,7 @@ def extract_representations(
 
     return final_layer_representations
 
-def localize_fed10(model_id: str,
+def localize_fedorenko2010(model_id: str,
     model: torch.nn.Module, 
     top_k: int|float, 
     tokenizer: transformers.PreTrainedTokenizer, 
