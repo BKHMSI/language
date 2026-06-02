@@ -1,4 +1,6 @@
 import numpy as np
+import torch
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
 from brainscore_language.model_helpers import localize
 
@@ -45,3 +47,18 @@ def test_mask_cached_to_slash_replaced_path(monkeypatch, tmp_path):
         model_id="Qwen/Qwen3-4B", model=None, top_k=7, tokenizer=None,
         hidden_dim=50, layer_names=["layer.0", "layer.1"], batch_size=4, device="cpu")
     np.testing.assert_array_equal(reloaded, mask)
+
+
+def test_localize_runs_on_bf16_model(monkeypatch, tmp_path):
+    # bf16 activations must be cast before numpy conversion; a completed run proves the fix
+    monkeypatch.setattr(localize, "BRAINIO_CACHE", str(tmp_path))
+    model = AutoModelForCausalLM.from_pretrained("distilgpt2", torch_dtype=torch.bfloat16)
+    tokenizer = AutoTokenizer.from_pretrained("distilgpt2")
+    layer_names = ["transformer.h.0", "transformer.h.1"]
+    hidden_dim = model.config.n_embd
+    mask = localize.localize_fedorenko2010(
+        model_id="distilgpt2", model=model, top_k=0.1, tokenizer=tokenizer,
+        hidden_dim=hidden_dim, layer_names=layer_names, batch_size=8, device="cpu")
+    assert mask.shape == (len(layer_names), hidden_dim)
+    assert set(np.unique(mask)) <= {0, 1}
+    assert mask.sum() == int(0.1 * len(layer_names) * hidden_dim)
